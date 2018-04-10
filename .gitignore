@@ -5,4 +5,4 @@
 *.zip
 
 # Excluir imágenes
-*.{jpg,jpeg,png,gif}
+*.jpeg
