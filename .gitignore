@@ -1,2 +1,8 @@
 # Excluir todos los ficheros pdf
 *.pdf
+
+# Excluir archivadores zip
+*.zip
+
+# Excluir imágenes
+*.{jpg,jpeg,png,gif}

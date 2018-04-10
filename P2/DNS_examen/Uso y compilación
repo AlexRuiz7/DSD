@@ -1,0 +1,25 @@
+/*  Ejercico DNS: Protocolo de simulación del servicio DNS
+
+///////////////////////////////////////////////////////////////////////////////
+////	 	Autor:	Alejandro Ruiz Becerra
+////
+//// 	  Asignatura:	Desarrollo de Sistemas Distribuidos
+////
+////		Universidad de Granada - Curso 2017-2018
+///////////////////////////////////////////////////////////////////////////////
+
+    Compilación:
+      * Cliente_1: cc DNS_client_1.c DNS_clnt.c DNS_xdr.c -o DNS_client_1 -lnsl
+      * Cliente_2: cc DNS_client_2.c DNS_clnt.c DNS_xdr.c -o DNS_client_2 -lnsl
+      * DNS_1:   cc DNS_server_1.c DNS_svc_1.c DNS_xdr.c DNS_clnt.c -o DNS_server_1 -lnsl
+      * DNS_2:   cc DNS_server_2.c DNS_svc_2.c DNS_xdr.c DNS_clnt.c -o DNS_server_2 -lnsl
+
+    Uso y explicación:
+      El orden correcto de ejecución de los programas es:
+          DNS_1, DNS_2 y Cliente_1
+                    o
+          DNS_2, DNS_1 y Cliente_2
+
+      El servidor DNS comprueba su tabla de direcciones, si encuentra la petición,
+      devuelve su valor IP, si no, consulta a DNS_1
+*/
