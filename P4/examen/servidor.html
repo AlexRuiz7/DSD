@@ -1,0 +1,235 @@
+<!-- Servidor.html -->
+
+<!DOCTYPE html>
+<html>
+
+  <head>
+      <meta charset="utf-8" />
+      <title> DSD: Servicio Domótico </title>
+      <link rel="stylesheet" types="text/css" href="estilo.css">
+  </head>
+
+  <body>
+    <!-- MAIN DIV -->
+    <div class="main actuadores">
+
+      <!-- Aire Acondicionado -->
+      <div class="actuador">
+        <form class="formulario" id="aire">
+          <h2> Aire Acondicionado </h2>
+          <div class="elemento centrado">
+            <label for="valor">Valor: </label>
+            <input name="valor" type="number" value="24" min="10" max="40"/>
+          </div>
+          <div class="elemento centrado">
+            <label for="min">Mínimo: </label>
+            <input name="min" type="number" value="18" min="10" max="40"/>
+          </div>
+          <div class="elemento centrado">
+            <label for="max">Máximo: </label>
+            <input name="max" type="number" value="30" min="10" max="40"/>
+          </div>
+          <div class="main" style="grid-gap: 0%;">
+            <input class="centrado" type="submit" name="submit" value="Actualizar valores"
+              onclick="enviar('aire');return false;"/>
+            <label class="switch centrado">
+              <input type="checkbox" id="slider_1" onclick="encender('slider_1');">
+              <span class="slider round"></span>
+            </label>
+          </div>
+        </form>
+      </div>
+
+      <!-- Persianas -->
+      <div class="actuador">
+        <form class="formulario" id="persianas">
+          <h2> Persianas </h2>
+          <div class="elemento centrado">
+            <label for="valor">Valor: </label>
+            <input name="valor" type="number" value="5" min="0" max="10"/>
+          </div>
+          <div class="elemento centrado">
+            <label for="min">Mínimo: </label>
+            <input name="min" type="number" value="3" min="0" max="10"/>
+          </div>
+          <div class="elemento centrado">
+            <label for="max">Máximo: </label>
+            <input name="max" type="number" value="7" min="0" max="10"/>
+          </div>
+          <div class="main" style="grid-gap: 0%;">
+            <input class="centrado" type="submit" name="submit"
+                value="Actualizar valores" onclick="enviar('persianas');return false;"/>
+            <label class="switch centrado">
+              <input type="checkbox" id="slider_2" onclick="encender('slider_2');">
+              <span class="slider round"></span>
+            </label>
+          </div>
+        </form>
+      </div>
+
+      <!-- Sistema de Prevención de Incendios -->
+      <div class="actuador">
+        <form class="formulario" id="humo">
+          <h2> Preveción de Incendios </h2>
+          <div class="elemento centrado">
+            <label for="valor">Humo (%): </label>
+            <input name="valor" type="number" value="0" min="0" max="100"/>
+          </div>
+          <div class="elemento centrado">
+            <label for="min">Mínimo: </label>
+            <input name="min" type="number" value="0" min="10" max="40" readonly/>
+          </div>
+          <div class="elemento centrado">
+            <label for="max">Máximo: </label>
+            <input name="max" type="number" value="20" min="10" max="40" readonly/>
+          </div>
+          <div class="main" style="grid-gap: 0%;">
+            <input class="centrado" type="submit" name="submit" value="Actualizar valores"
+              onclick="enviar('humo');return false;"/>
+            <label class="switch centrado">
+              <input type="checkbox" id="slider_3" onclick="return false;" >
+              <span class="slider round"></span>
+            </label>
+          </div>
+        </form>
+      </div>
+
+
+    </div>
+    <!-- MAIN DIV -->
+
+    <div class="centrado log-parent actuador">
+      <h1>HISTORIAL DE EVENTOS DEL SERVIDOR</h1>
+      <div id="log"></div>
+    </div>
+
+  </body>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script type="text/javascript">
+
+    var serviceURL = document.URL;
+    var socket = io.connect(serviceURL);
+
+    /**
+     * [enviar description]
+     * @param  {[type]} id [description]
+     * @return {[type]}    [description]
+     */
+    function enviar(id) {
+      var formulario = document.getElementById(id);
+      var datos = new Array();
+      // Valor
+      datos.push(formulario[0].value);
+      // Mínimo
+      datos.push(formulario[1].value);
+      // Máximo
+      datos.push(formulario[2].value);
+
+      // Envío de información al Agente
+      var sensor;
+      if (id == "aire")           sensor = "temperatura"
+      else if (id == "persianas") sensor = "luminosidad";
+      else                        sensor = "humo";
+      agente (sensor, datos);
+
+      // Envío de información al servidor
+      socket.emit('enviar-datos-'+id, datos);
+      // alert("Datos enviados: enviar-datos-"+ id +" -> "+ datos.toString());
+    }
+
+
+    /**
+     * [encender description]
+     * @param  {[type]} slider_id [description]
+     * @return {[type]}           [description]
+     */
+    function encender(slider_id){
+      var slider = document.getElementById(slider_id);
+      var estado;
+
+      if ( (slider_id === "slider_1") || (slider_id === "slider_3") ) {
+        ((slider.checked) ? estado="Encendido" : estado="Apagado");
+        socket.emit(slider_id, estado);
+      }
+      else {
+        ((slider.checked) ? estado="Abierta" : estado="Cerrada");
+        socket.emit(slider_id, estado);
+      }
+      // alert("Slider: " + estado);
+    }
+
+
+    /**
+     * Actualiza el registro de eventos del servicio
+     */
+    function actualizarLog (mensaje, importante) {
+      var div = document.getElementById("log");
+      if (importante==true)
+        var evento = "<p style='color: red;'> "+mensaje+" </p>"
+      else
+        var evento = "<p> "+mensaje+" </p>"
+      div.innerHTML += evento;
+
+      // Actualizar scroll
+      div.scrollTop = div.scrollHeight;
+    }
+
+    /**
+     * Recepción de eventos del servidor
+     */
+    socket.on ('log', function (mensaje) {
+      actualizarLog (mensaje);
+    });
+
+    socket.on ('aviso', function (mensaje) {
+      actualizarLog (mensaje, true);
+    });
+
+    /**
+     * [agente description]
+     * @param  {[type]} sensor [description]
+     * @param  {[type]} datos  [description]
+     * @return {[type]}        [description]
+     */
+    function agente (sensor, datos) {
+      var temp = document.getElementById("aire");
+      var luz = document.getElementById("persianas");
+      var humo = document.getElementById("humo");
+
+      if ( (+temp[0].value > +temp[2].value) && (+luz[0].value > +luz[2].value) ){
+        socket.emit ("accion");
+        document.getElementById("slider_2").checked = true;
+        encender ("slider_2");
+      }
+      else if ( (+datos[0] < +datos[1]) || (+datos[0] > +datos[2]) )
+        socket.emit ("aviso", sensor);
+      else {
+        document.getElementById("slider_2").checked = false;
+        encender ("slider_2");
+      }
+
+      /* Examen */
+        // Se comprueba el porcentage de humo y se enciende el sistema si supera
+        // el valor máximo
+      if ( (+humo[0].value > +humo[2].value) ) {
+        socket.emit ("fuego", "humo");
+        document.getElementById ("slider_3").checked = true;
+        encender ("slider_3");
+
+        // Apaga el A/C en caso de estar encedido
+         var aire_encendido = document.getElementById ("slider_1");
+        if ( aire_encendido.checked ){
+          socket.emit ("fuego", "aire")
+          aire_encendido.checked = false;
+          encender ("slider_1");
+        }
+      }
+      else
+        document.getElementById("slider_3").checked = false;
+
+    }
+
+  </script>
+
+</html>
