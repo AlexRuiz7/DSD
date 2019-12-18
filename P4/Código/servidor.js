@@ -96,8 +96,10 @@ var httpServer = http.createServer (
  		throw err;
 
   var dbo = db.db("domotica");
-	var msgCliente = null;
-	httpServer.listen(8082);
+  var msgCliente = null;
+  var puerto = 8081;
+  httpServer.listen(puerto);
+  console.log("Servidor listo en puerto: " + puerto);
 	var io = socketio.listen(httpServer);
 
   dbo.createCollection("persianas", function(err, collection){
